@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>Osaamisperustainen olio-ohjelmoinnin opetus</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      margin: 2rem;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    h1, h2, h3 {
+      color: #2c3e50;
+    }
+    .box {
+      background: #ffffff;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      border-left: 5px solid #3498db;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.75rem;
+      text-align: left;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+    form {
+      margin-top: 1rem;
+    }
+    label {
+      display: block;
+      margin: 0.5rem 0 0.25rem;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #3498db;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    canvas {
+      max-width: 900px;
+      height: 500px !important;
+      margin: 2rem auto;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Osaamisperustainen olio-ohjelmoinnin opetus ammattikorkeakoulussa</h1>
+
+  <div class="box">
+    <h2>🎓 Esimerkki: opiskelija opiskelee olio-ohjelmointia osaamisperustaisesti</h2>
+    <h3>🔹 Osaamistavoite:</h3>
+    <p><em>"Opiskelija osaa suunnitella ja toteuttaa yksinkertaisen oliopohjaisen sovelluksen, hyödyntäen luokkia, olioita, perintää ja kapselointia."</em></p>
+
+    <h3>🔧 Käytännön toteutus:</h3>
+    <ul>
+      <li><strong>Tavoitteet ensin:</strong> Kurssin alussa esitellään osaamistavoitteet selkeästi.</li>
+      <li><strong>Joustavat oppimistavat:</strong> opiskelija voi valita lähiopetuksen, verkkokurssin tai osaamisen suoran näyttämisen.</li>
+      <li><strong>Tekemällä oppiminen:</strong> Harjoituksia ja isompi projekti (esim. kirjaston lainausjärjestelmä).</li>
+      <li><strong>Osaamisen näyttö:</strong> Projekti, videointi ja esitys osaamisesta.</li>
+      <li><strong>Reflektointi ja palaute:</strong> Palautteen perusteella mahdollisuus täydentää työtä.</li>
+    </ul>
+
+    <h3>✅ Tiivistys:</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Perinteinen malli</th>
+          <th>Osaamisperustainen malli</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Keskitytään siihen, mitä käydään läpi</td>
+          <td>Keskitytään siihen, mitä opitaan</td>
+        </tr>
+        <tr>
+          <td>Yksi tapa oppia ja suorittaa</td>
+          <td>Useita tapoja oppia ja osoittaa osaaminen</td>
+        </tr>
+        <tr>
+          <td>Arviointi perustuu tehtävien ja kokeiden pisteisiin</td>
+          <td>Arviointi perustuu saavutettuun osaamiseen</td>
+        </tr>
+        <tr>
+          <td>Opettaja ohjaa opetusta</td>
+          <td>Opettaja tukee yksilöllistä oppimista</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="box">
+    <h2>💡 Esimerkki OOP-kurssiprojektista ja arviointikriteereistä</h2>
+
+    <h3>📁 Projektin kuvaus:</h3>
+    <p><strong>Sovelluksen aihe:</strong> "Lainausjärjestelmä kirjastoille"</p>
+    <p>Opiskelija toteuttaa oliopohjaisen sovelluksen, jossa voi luoda, hakea, lainata ja palauttaa kirjoja. Käytössä tulee olla vähintään kolme luokkaa, perintää, kapselointia ja listojen käsittelyä.</p>
+
+    <h3>🔍 Arviointikriteerit:</h3>
+    <ul>
+      <li><strong>Rakenne ja suunnittelu:</strong> Onko ohjelma jaettu järkeviin luokkiin ja toimiiko perintä loogisesti?</li>
+      <li><strong>Koodin laatu:</strong> Luettavuus, kommentointi ja virheiden käsittely.</li>
+      <li><strong>OOP-periaatteet:</strong> Hyödynnetäänkö kapselointia, perintää ja olioiden käyttöä selkeästi?</li>
+      <li><strong>Toimivuus:</strong> Toimiiko sovellus annetun tehtävänannon mukaisesti?</li>
+      <li><strong>Reflektio:</strong> Opiskelija kykenee perustelemaan ratkaisujaan ja pohtimaan oppimistaan.</li>
+    </ul>
+  </div>
+
+  <div class="box">
+    <h2>📝 Kurssin aloituslomake opiskelijalle</h2>
+    <form>
+      <label for="nimi">Nimi</label>
+      <input type="text" id="nimi" name="nimi">
+
+      <label for="tausta">Onko sinulla aiempaa kokemusta ohjelmoinnista? Kerro lyhyesti:</label>
+      <textarea id="tausta" name="tausta"></textarea>
+
+      <label for="suoritus">Miten haluaisit suorittaa kurssin?</label>
+      <select id="suoritus" name="suoritus">
+        <option value="lahi">Lähiopetuksessa osallistumalla</option>
+        <option value="verkkokurssi">Itsenäisesti verkkomateriaalien avulla</option>
+        <option value="osaamisen_naytto">Osoitan osaamiseni suoraan näytöllä</option>
+        <option value="yhdistelma">Yhdistelmä edellä mainituista</option>
+      </select>
+
+      <label for="tuki">Tarvitsetko erityistä tukea tai ohjausta?</label>
+      <textarea id="tuki" name="tuki"></textarea>
+
+      <button type="submit">Lähetä suunnitelma</button>
+    </form>
+  </div>
+
+  <div class="box">
+    <h2>📊 Aikatarvearvio: 5 opintopisteen OOP-kurssi, 120 opiskelijaa</h2>
+    <p>Tässä arvio siitä, kuinka paljon opettajan työaikaa voi kulua osaamisperustaisesti toteutettuun 5 opintopisteen olio-ohjelmoinnin kurssiin, kun osallistujia on 120.</p>
+
+    <h3>⏱️ Laskelma (arviot per tehtävä ja opiskelijamäärä):</h3>
+    <ul>
+      <li><strong>Kurssin suunnittelu ja materiaalit:</strong> 20–30 h</li>
+      <li><strong>Avausluennot/info + opastusvideot:</strong> 6 h</li>
+      <li><strong>Opiskelijoiden aloituslomakkeiden lukeminen:</strong> 6 h</li>
+      <li><strong>Yksilölliset ohjaustapaamiset (30 % opiskelijoista):</strong> 12 h</li>
+      <li><strong>Luokkaopetus 70 % opiskelijoista (6 h/vko × 8 vkoa):</strong> 48 h</li>
+      <li><strong>Harjoitusten ohjaus ja kysymyksiin vastaaminen:</strong> 30 h</li>
+      <li><strong>Projektiarvioinnit + palautteet:</strong> 30 h</li>
+      <li><strong>Uusintatyöt ja täydennykset:</strong> 5 h</li>
+    </ul>
+
+    <h3>🔚 Yhteensä: noin <strong>158–167 tuntia</strong></h3>
+    <p>Tämä vastaa noin <strong>4 täyttä työviikkoa</strong> tai enemmän, riippuen opettajan kokemuksesta ja opiskelijaryhmän tuen tarpeesta.</p>
+
+    <canvas id="workloadChart"></canvas>
+  </div>
+
+  <script>
+    const ctx = document.getElementById('workloadChart').getContext('2d');
+    const workloadChart = new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: [
+      'Suunnittelu & materiaalit',
+      'Avausluennot',
+      'Lomakkeet',
+      'Ohjaustapaamiset',
+      'Luokkaopetus',
+      'Harjoitukset',
+      'Arvioinnit',
+      'Täydennykset'
+    ],
+    datasets: [{
+      label: 'Tunnit',
+      data: [25, 6, 6, 12, 48, 30, 30, 5],
+      backgroundColor: '#3498db'
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+        labels: {
+          font: {
+            size: 16 // Suurennetaan legendan fonttikokoa
+          }
+        }
+      },
+      title: {
+        display: true,
+        text: 'Opettajan työaika (arvio tunneissa)',
+        font: {
+          size: 30 // Suurennetaan otsikon fonttikokoa
+        }
+      }
+    },
+    scales: {
+      x: {
+        ticks: {
+          font: {
+            size: 20 // Suurennetaan x-akselin tekstin fonttikokoa
+          }
+        }
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 10,
+          font: {
+            size: 14 // Suurennetaan y-akselin tekstin fonttikokoa
+          }
+        }
+      }
+    }
+  }
+});
+
+  </script>
+
+</body>
+</html>
