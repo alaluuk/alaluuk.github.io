@@ -1,0 +1,2038 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Aktiivisuusraportti</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #24292e;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+        }
+
+        h1 {
+            color: #6f42c1;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            color: #0366d6;
+            font-size: 1.8em;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #e1e4e8;
+        }
+
+        .generated-date {
+            text-align: center;
+            color: #586069;
+            font-size: 0.9em;
+            margin-bottom: 30px;
+        }
+
+        .view-toggle {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .view-toggle button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            margin: 0 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .view-toggle button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .view-toggle button.active {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+        }
+
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        th:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        th.sortable::after {
+            content: ' ⇅';
+            opacity: 0.5;
+        }
+
+        th.sorted-asc::after {
+            content: ' ↑';
+            opacity: 1;
+        }
+
+        th.sorted-desc::after {
+            content: ' ↓';
+            opacity: 1;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        tbody tr {
+            transition: background-color 0.2s;
+        }
+
+        tbody tr:hover {
+            background-color: #f6f8fa;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        a {
+            color: #0366d6;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        a:hover {
+            color: #0256c7;
+            text-decoration: underline;
+        }
+
+        .repo-group {
+            margin: 30px 0;
+            border: 1px solid #e1e4e8;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .repo-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .repo-header:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+        .repo-header .toggle-icon {
+            font-size: 1.2em;
+            transition: transform 0.3s;
+        }
+
+        .repo-header.collapsed .toggle-icon {
+            transform: rotate(-90deg);
+        }
+
+        .repo-content {
+            max-height: 1000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .repo-content.collapsed {
+            max-height: 0;
+        }
+
+        .stat-high {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .stat-medium {
+            color: #f9826c;
+            font-weight: 600;
+        }
+
+        .stat-low {
+            color: #6a737d;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e1e4e8;
+            color: #586069;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            table {
+                font-size: 0.85em;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+
+            .view-toggle button {
+                padding: 10px 20px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Aktiivisuusraportti</h1>
+        <p class="generated-date">Luotu: 2026-04-11</p>
+
+        <div class="view-toggle">
+            <button onclick="showView('person')" id="btn-person" class="active">Henkilö-keskeinen näkymä</button>
+            <button onclick="showView('repo')" id="btn-repo">Repo-keskeinen näkymä</button>
+        </div>
+
+        <div id="view-person" class="view active">
+            <h2>Contributtorit henkilöittäin</h2>
+            <table id="person-table">
+            <thead>
+                <tr>
+                    <th class="sortable" onclick="sortTable('person-table', 0)">Contributor</th>
+                    <th class="sortable" onclick="sortTable('person-table', 1)">Commitit</th>
+                    <th class="sortable" onclick="sortTable('person-table', 2)">PR:t avattu</th>
+                    <th class="sortable" onclick="sortTable('person-table', 3)">PR:t mergetty</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><a href="https://github.com/Onsekyl" target="_blank">Onsekyl (Kimi Leinola)</a></td>
+                    <td class="stat-high">109</td>
+                    <td>30</td>
+                    <td>28</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/InspectorSpy" target="_blank">InspectorSpy (Luka Huuhtanen)</a></td>
+                    <td class="stat-medium">98</td>
+                    <td>11</td>
+                    <td>10</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/tuomok1010" target="_blank">tuomok1010 (Tuomo Kanniainen)</a></td>
+                    <td class="stat-medium">87</td>
+                    <td>19</td>
+                    <td>16</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/Ipa-oss" target="_blank">Ipa-oss (Ilari Bäckman)</a></td>
+                    <td class="stat-medium">75</td>
+                    <td>24</td>
+                    <td>24</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/Takakontti" target="_blank">Takakontti (Daniel Nylander)</a></td>
+                    <td class="stat-medium">53</td>
+                    <td>19</td>
+                    <td>19</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/SNi-ops" target="_blank">SNi-ops (Santtu Nissinen)</a></td>
+                    <td class="stat-medium">43</td>
+                    <td>15</td>
+                    <td>13</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/JarkkoHuhtala" target="_blank">JarkkoHuhtala (Jarkko Huhtala)</a></td>
+                    <td class="stat-medium">43</td>
+                    <td>16</td>
+                    <td>15</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/pelepist" target="_blank">pelepist (Petteri Lepisto)</a></td>
+                    <td class="stat-medium">41</td>
+                    <td>9</td>
+                    <td>9</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/RosaKeranen" target="_blank">RosaKeranen (Rosa Keränen)</a></td>
+                    <td class="stat-medium">39</td>
+                    <td>8</td>
+                    <td>8</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/NicknameAlwaystaken" target="_blank">NicknameAlwaystaken (Miiro Ukonaho)</a></td>
+                    <td class="stat-medium">37</td>
+                    <td>16</td>
+                    <td>16</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/Kuistiapina" target="_blank">Kuistiapina (Joni Ylimartimo)</a></td>
+                    <td class="stat-medium">36</td>
+                    <td>21</td>
+                    <td>21</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/HenriKemppainen" target="_blank">HenriKemppainen (Henri Kemppainen)</a></td>
+                    <td class="stat-medium">36</td>
+                    <td>11</td>
+                    <td>11</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/ollijaa" target="_blank">ollijaa (Olli Jääskeläinen)</a></td>
+                    <td class="stat-medium">35</td>
+                    <td>10</td>
+                    <td>10</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/chrismikh" target="_blank">chrismikh (Christopher Mikhaltsevitch)</a></td>
+                    <td class="stat-medium">34</td>
+                    <td>6</td>
+                    <td>5</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/AttePaaso" target="_blank">AttePaaso (Atte Paaso)</a></td>
+                    <td class="stat-medium">33</td>
+                    <td>13</td>
+                    <td>13</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/Been914" target="_blank">Been914 (Elias Lämsä)</a></td>
+                    <td class="stat-medium">32</td>
+                    <td>7</td>
+                    <td>7</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/mopsipriv" target="_blank">mopsipriv (Andrei Tsiptsou)</a></td>
+                    <td class="stat-medium">32</td>
+                    <td>9</td>
+                    <td>8</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/vimukthimadushan94" target="_blank">vimukthimadushan94 (Vimukthi Parakrama)</a></td>
+                    <td class="stat-medium">31</td>
+                    <td>11</td>
+                    <td>9</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/HuovilaR" target="_blank">HuovilaR (Roni Huovila)</a></td>
+                    <td class="stat-medium">30</td>
+                    <td>11</td>
+                    <td>11</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/aleksivatj" target="_blank">aleksivatj (Aleksi Vatjus-Anttila)</a></td>
+                    <td class="stat-medium">29</td>
+                    <td>13</td>
+                    <td>12</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/jnakoivula" target="_blank">jnakoivula (Joonas Koivula)</a></td>
+                    <td class="stat-medium">28</td>
+                    <td>9</td>
+                    <td>9</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/erianl" target="_blank">erianl (Erian Latif)</a></td>
+                    <td class="stat-medium">25</td>
+                    <td>15</td>
+                    <td>13</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/MrAlakorkko" target="_blank">MrAlakorkko (Leevi Alakörkkö)</a></td>
+                    <td class="stat-medium">24</td>
+                    <td>10</td>
+                    <td>10</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/natejak" target="_blank">natejak (Kajetan Zelech-Alatarvas)</a></td>
+                    <td class="stat-medium">22</td>
+                    <td>8</td>
+                    <td>7</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/EemeliKangas" target="_blank">EemeliKangas (Eemeli Kangas)</a></td>
+                    <td class="stat-medium">22</td>
+                    <td>7</td>
+                    <td>7</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/HiskiMoi" target="_blank">HiskiMoi (Hiski Moilanen)</a></td>
+                    <td class="stat-medium">22</td>
+                    <td>6</td>
+                    <td>6</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/DanielHyvarinen" target="_blank">DanielHyvarinen (Daniel Hyvärinen)</a></td>
+                    <td class="stat-medium">22</td>
+                    <td>16</td>
+                    <td>14</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/TopiKuha-Topsu" target="_blank">TopiKuha-Topsu (Topi Kuha)</a></td>
+                    <td class="stat-medium">21</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/KatajaJu" target="_blank">KatajaJu (Juha Katajamaa)</a></td>
+                    <td class="stat-medium">21</td>
+                    <td>9</td>
+                    <td>9</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/h7mmxd" target="_blank">h7mmxd (Hammad Atif)</a></td>
+                    <td class="stat-medium">21</td>
+                    <td>10</td>
+                    <td>10</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/opheikkinen" target="_blank">opheikkinen (Olli Heikkinen)</a></td>
+                    <td class="stat-medium">21</td>
+                    <td>9</td>
+                    <td>9</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/ElinaHer" target="_blank">ElinaHer (Elina Hertteli)</a></td>
+                    <td class="stat-medium">21</td>
+                    <td>13</td>
+                    <td>13</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/PaleHerra" target="_blank">PaleHerra (Paulus Määttä)</a></td>
+                    <td class="stat-medium">20</td>
+                    <td>2</td>
+                    <td>2</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/EnkryptattuDev" target="_blank">EnkryptattuDev (Ville Vartiainen)</a></td>
+                    <td class="stat-medium">20</td>
+                    <td>9</td>
+                    <td>6</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/Lassesa" target="_blank">Lassesa (Lasse Sarja)</a></td>
+                    <td class="stat-medium">20</td>
+                    <td>4</td>
+                    <td>3</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/ilari7" target="_blank">ilari7 (Ilari Ruotsalainen)</a></td>
+                    <td class="stat-medium">20</td>
+                    <td>8</td>
+                    <td>7</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/eetutyni" target="_blank">eetutyni (Eetu Tyni)</a></td>
+                    <td class="stat-medium">20</td>
+                    <td>7</td>
+                    <td>6</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/EhtSome1" target="_blank">EhtSome1 (Alpo Uusitalo)</a></td>
+                    <td class="stat-low">19</td>
+                    <td>7</td>
+                    <td>4</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/N3mN3mm" target="_blank">N3mN3mm (Mona Heinola)</a></td>
+                    <td class="stat-low">19</td>
+                    <td>11</td>
+                    <td>9</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/jamppa2" target="_blank">jamppa2 (Jani Männynsalo)</a></td>
+                    <td class="stat-low">18</td>
+                    <td>6</td>
+                    <td>3</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/neeakolppanen" target="_blank">neeakolppanen (Neea Kolppanen)</a></td>
+                    <td class="stat-low">18</td>
+                    <td>6</td>
+                    <td>6</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/jonnejee" target="_blank">jonnejee (Jonne Karjalainen)</a></td>
+                    <td class="stat-low">18</td>
+                    <td>4</td>
+                    <td>4</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/EKa1la" target="_blank">EKa1la (Eetu Kaila)</a></td>
+                    <td class="stat-low">18</td>
+                    <td>4</td>
+                    <td>2</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/jaakkojaa" target="_blank">jaakkojaa (Jaakko Hätälä)</a></td>
+                    <td class="stat-low">17</td>
+                    <td>8</td>
+                    <td>7</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/luvmiko" target="_blank">luvmiko (Miko Tietäväinen)</a></td>
+                    <td class="stat-low">15</td>
+                    <td>4</td>
+                    <td>4</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/HenriEkorre" target="_blank">HenriEkorre (Henri Ekorre)</a></td>
+                    <td class="stat-low">15</td>
+                    <td>7</td>
+                    <td>6</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/eliastikanoja" target="_blank">eliastikanoja (Elias Tikanoja)</a></td>
+                    <td class="stat-low">15</td>
+                    <td>1</td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/tohenttinen" target="_blank">tohenttinen (Touko Henttinen)</a></td>
+                    <td class="stat-low">15</td>
+                    <td>4</td>
+                    <td>4</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/Tevite1" target="_blank">Tevite1 (Veeti Terho)</a></td>
+                    <td class="stat-low">14</td>
+                    <td>5</td>
+                    <td>5</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/OlliPA2" target="_blank">OlliPA2 (Olli Partanen)</a></td>
+                    <td class="stat-low">14</td>
+                    <td>6</td>
+                    <td>5</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/qSakru" target="_blank">qSakru (Sakaria Poutiainen)</a></td>
+                    <td class="stat-low">14</td>
+                    <td>3</td>
+                    <td>3</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/Joppelii" target="_blank">Joppelii</a></td>
+                    <td class="stat-low">14</td>
+                    <td>5</td>
+                    <td>5</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/SanttuHe" target="_blank">SanttuHe (Santtu Heikkilä)</a></td>
+                    <td class="stat-low">14</td>
+                    <td>11</td>
+                    <td>4</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/UkkoP01" target="_blank">UkkoP01 (Ukko Peltola)</a></td>
+                    <td class="stat-low">13</td>
+                    <td>1</td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/Jesperijk" target="_blank">Jesperijk (Jesperi Kontio)</a></td>
+                    <td class="stat-low">13</td>
+                    <td>3</td>
+                    <td>3</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/Veikko115" target="_blank">Veikko115 (Veikko Teppola)</a></td>
+                    <td class="stat-low">12</td>
+                    <td>6</td>
+                    <td>6</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/helppopeli" target="_blank">helppopeli</a></td>
+                    <td class="stat-low">12</td>
+                    <td>2</td>
+                    <td>2</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/Juhoro" target="_blank">Juhoro</a></td>
+                    <td class="stat-low">12</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/Vilunki15" target="_blank">Vilunki15</a></td>
+                    <td class="stat-low">11</td>
+                    <td>2</td>
+                    <td>2</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/LucasSal921" target="_blank">LucasSal921 (Lucas Salonen)</a></td>
+                    <td class="stat-low">11</td>
+                    <td>5</td>
+                    <td>5</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/Daytaraytata" target="_blank">Daytaraytata (Kristian Härö)</a></td>
+                    <td class="stat-low">11</td>
+                    <td>7</td>
+                    <td>6</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/TheGreatEvo" target="_blank">TheGreatEvo (Joona Närhi)</a></td>
+                    <td class="stat-low">10</td>
+                    <td>7</td>
+                    <td>6</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/kirsikkka" target="_blank">kirsikkka</a></td>
+                    <td class="stat-low">10</td>
+                    <td>6</td>
+                    <td>6</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/aaroromppainen" target="_blank">aaroromppainen (Aaro Romppainen)</a></td>
+                    <td class="stat-low">10</td>
+                    <td>4</td>
+                    <td>3</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/JuhoRomp" target="_blank">JuhoRomp (Juho Romppainen)</a></td>
+                    <td class="stat-low">9</td>
+                    <td>10</td>
+                    <td>8</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/aleksihaikara" target="_blank">aleksihaikara (Aleksi Haikara)</a></td>
+                    <td class="stat-low">9</td>
+                    <td>4</td>
+                    <td>4</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/jessemarttinen1-spec" target="_blank">jessemarttinen1-spec (Jesse Marttinen)</a></td>
+                    <td class="stat-low">9</td>
+                    <td>3</td>
+                    <td>3</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/Janiii62" target="_blank">Janiii62 (Jani Mursu)</a></td>
+                    <td class="stat-low">8</td>
+                    <td>3</td>
+                    <td>3</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/arttutolli" target="_blank">arttutolli (Arttu Tölli)</a></td>
+                    <td class="stat-low">8</td>
+                    <td>8</td>
+                    <td>8</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/FixLevelHeadPlz" target="_blank">FixLevelHeadPlz (Aleksi Puolitaival)</a></td>
+                    <td class="stat-low">7</td>
+                    <td>3</td>
+                    <td>2</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/RoNiku1" target="_blank">RoNiku1 (Roni Nikupeteri)</a></td>
+                    <td class="stat-low">7</td>
+                    <td>3</td>
+                    <td>3</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/SasuWalta" target="_blank">SasuWalta (Sasu Walta)</a></td>
+                    <td class="stat-low">7</td>
+                    <td>2</td>
+                    <td>2</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/Ilvesveeti" target="_blank">Ilvesveeti (Veeti Ilvesluoto)</a></td>
+                    <td class="stat-low">7</td>
+                    <td>1</td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/eikkapine" target="_blank">eikkapine (eino mänty)</a></td>
+                    <td class="stat-low">7</td>
+                    <td>3</td>
+                    <td>2</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/Jennasipola" target="_blank">Jennasipola (Jenna Sipola)</a></td>
+                    <td class="stat-low">7</td>
+                    <td>4</td>
+                    <td>2</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/Jossuli" target="_blank">Jossuli (Johanna Aikio)</a></td>
+                    <td class="stat-low">7</td>
+                    <td>12</td>
+                    <td>9</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/VihtoriK" target="_blank">VihtoriK (Vihtori Karttunen)</a></td>
+                    <td class="stat-low">7</td>
+                    <td>3</td>
+                    <td>3</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/TeemuPP" target="_blank">TeemuPP (Teemu Pitkäaho)</a></td>
+                    <td class="stat-low">7</td>
+                    <td>5</td>
+                    <td>5</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/Jerskacs" target="_blank">Jerskacs (Jerome Kälkäjä)</a></td>
+                    <td class="stat-low">7</td>
+                    <td>4</td>
+                    <td>4</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/Tuipandeerus" target="_blank">Tuipandeerus (Thomas Mustonen)</a></td>
+                    <td class="stat-low">6</td>
+                    <td>3</td>
+                    <td>3</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/rkeranen" target="_blank">rkeranen (Reetta Keränen)</a></td>
+                    <td class="stat-low">6</td>
+                    <td>9</td>
+                    <td>6</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/Havio21" target="_blank">Havio21 (Voitto Oja)</a></td>
+                    <td class="stat-low">6</td>
+                    <td>1</td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/Ishaja77" target="_blank">Ishaja77 (Iiro Leppälä)</a></td>
+                    <td class="stat-low">5</td>
+                    <td>2</td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/kanelietana" target="_blank">kanelietana (Ella Liukkonen)</a></td>
+                    <td class="stat-low">5</td>
+                    <td>2</td>
+                    <td>2</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/Helios36" target="_blank">Helios36 (Konsta Miilukangas)</a></td>
+                    <td class="stat-low">5</td>
+                    <td>1</td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/osku12345" target="_blank">osku12345 (Oskari Veijola)</a></td>
+                    <td class="stat-low">5</td>
+                    <td>2</td>
+                    <td>2</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/nhiiluong" target="_blank">nhiiluong (Nhi Luong)</a></td>
+                    <td class="stat-low">5</td>
+                    <td>3</td>
+                    <td>2</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/Tyrnihillo" target="_blank">Tyrnihillo (Joonas Kämäräinen)</a></td>
+                    <td class="stat-low">5</td>
+                    <td>3</td>
+                    <td>3</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/kelarotta" target="_blank">kelarotta (Kuisma Hautamäki)</a></td>
+                    <td class="stat-low">5</td>
+                    <td>1</td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/aaporitaranta" target="_blank">aaporitaranta</a></td>
+                    <td class="stat-low">4</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/kekemaisteri" target="_blank">kekemaisteri (Keijo Säkkinen)</a></td>
+                    <td class="stat-low">4</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/Omega-176" target="_blank">Omega-176 (Oliver Rajala)</a></td>
+                    <td class="stat-low">4</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/hanninenj2001" target="_blank">hanninenj2001 (Jussi Hanninen)</a></td>
+                    <td class="stat-low">4</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/jamsaa1" target="_blank">jamsaa1 (Jami Kylmänen)</a></td>
+                    <td class="stat-low">4</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/Jqh03" target="_blank">Jqh03 (Janne Hietanen)</a></td>
+                    <td class="stat-low">3</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/nakk1mies" target="_blank">nakk1mies</a></td>
+                    <td class="stat-low">3</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/asjbvgdjhasf" target="_blank">asjbvgdjhasf (Anttu Laulajainen)</a></td>
+                    <td class="stat-low">3</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/erttispc" target="_blank">erttispc (Eero Mäntyvaara)</a></td>
+                    <td class="stat-low">3</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/tsavela25" target="_blank">tsavela25 (Tommi Savela)</a></td>
+                    <td class="stat-low">3</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/jalluz" target="_blank">jalluz (Eeli Mäkinen)</a></td>
+                    <td class="stat-low">3</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/EuliX59" target="_blank">EuliX59 (Eeli Aalto)</a></td>
+                    <td class="stat-low">3</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/miro465" target="_blank">miro465 (Miro Haapasalo)</a></td>
+                    <td class="stat-low">3</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/mecharcanine" target="_blank">mecharcanine (Leo Jokiranta)</a></td>
+                    <td class="stat-low">3</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/Veeti757" target="_blank">Veeti757 (Veeti Kokkonen)</a></td>
+                    <td class="stat-low">3</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/TomiKarhula" target="_blank">TomiKarhula (Tomi Karhula)</a></td>
+                    <td class="stat-low">3</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/samivsam" target="_blank">samivsam (Sami Vahtola)</a></td>
+                    <td class="stat-low">2</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/NNIKLASS" target="_blank">NNIKLASS (Niklas Lampinen)</a></td>
+                    <td class="stat-low">2</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/jmzzynz" target="_blank">jmzzynz (jim nguyen)</a></td>
+                    <td class="stat-low">2</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/lenpel05" target="_blank">lenpel05 (Lenni Pellinen)</a></td>
+                    <td class="stat-low">1</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/OtsoVaarala" target="_blank">OtsoVaarala (Otso Väärälä)</a></td>
+                    <td class="stat-low">1</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/AleksandrCGM" target="_blank">AleksandrCGM (Aleksandr Starchenkov)</a></td>
+                    <td class="stat-low">1</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+
+        <div id="view-repo" class="view">
+            <h2>Contributtorit repositorioittain</h2>
+            
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-0" onclick="toggleRepo('repo-0')">
+                    <span><a href="https://github.com/tvt25spl-bank/group_1" target="_blank" style="color: white;">tvt25spl-bank/group_1</a>
+                    (4 contributoria, 85 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-0">
+                    <table id="table-repo-0">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-0', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-0', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/RosaKeranen" target="_blank">RosaKeranen (Rosa Keränen)</a></td>
+                                <td class="stat-medium">39</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/EemeliKangas" target="_blank">EemeliKangas (Eemeli Kangas)</a></td>
+                                <td class="stat-medium">22</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/opheikkinen" target="_blank">opheikkinen (Olli Heikkinen)</a></td>
+                                <td class="stat-medium">21</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/mecharcanine" target="_blank">mecharcanine (Leo Jokiranta)</a></td>
+                                <td class="stat-low">3</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-1" onclick="toggleRepo('repo-1')">
+                    <span><a href="https://github.com/tvt25spl-bank/group_2" target="_blank" style="color: white;">tvt25spl-bank/group_2</a>
+                    (4 contributoria, 33 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-1">
+                    <table id="table-repo-1">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-1', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-1', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/N3mN3mm" target="_blank">N3mN3mm (Mona Heinola)</a></td>
+                                <td class="stat-medium">19</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/Havio21" target="_blank">Havio21 (Voitto Oja)</a></td>
+                                <td class="stat-low">6</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/kelarotta" target="_blank">kelarotta (Kuisma Hautamäki)</a></td>
+                                <td class="stat-low">5</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/Veeti757" target="_blank">Veeti757 (Veeti Kokkonen)</a></td>
+                                <td class="stat-low">3</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-2" onclick="toggleRepo('repo-2')">
+                    <span><a href="https://github.com/tvt25spl-bank/group_3" target="_blank" style="color: white;">tvt25spl-bank/group_3</a>
+                    (4 contributoria, 192 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-2">
+                    <table id="table-repo-2">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-2', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-2', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/Ipa-oss" target="_blank">Ipa-oss (Ilari Bäckman)</a></td>
+                                <td class="stat-high">75</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/Takakontti" target="_blank">Takakontti (Daniel Nylander)</a></td>
+                                <td class="stat-high">53</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/JarkkoHuhtala" target="_blank">JarkkoHuhtala (Jarkko Huhtala)</a></td>
+                                <td class="stat-medium">43</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/KatajaJu" target="_blank">KatajaJu (Juha Katajamaa)</a></td>
+                                <td class="stat-medium">21</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-3" onclick="toggleRepo('repo-3')">
+                    <span><a href="https://github.com/tvt25spl-bank/group_4" target="_blank" style="color: white;">tvt25spl-bank/group_4</a>
+                    (4 contributoria, 43 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-3">
+                    <table id="table-repo-3">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-3', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-3', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/MrAlakorkko" target="_blank">MrAlakorkko (Leevi Alakörkkö)</a></td>
+                                <td class="stat-medium">24</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/VihtoriK" target="_blank">VihtoriK (Vihtori Karttunen)</a></td>
+                                <td class="stat-low">7</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/TeemuPP" target="_blank">TeemuPP (Teemu Pitkäaho)</a></td>
+                                <td class="stat-low">7</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/Tyrnihillo" target="_blank">Tyrnihillo (Joonas Kämäräinen)</a></td>
+                                <td class="stat-low">5</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-4" onclick="toggleRepo('repo-4')">
+                    <span><a href="https://github.com/tvt25spl-bank/group_5" target="_blank" style="color: white;">tvt25spl-bank/group_5</a>
+                    (4 contributoria, 91 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-4">
+                    <table id="table-repo-4">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-4', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-4', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/ollijaa" target="_blank">ollijaa (Olli Jääskeläinen)</a></td>
+                                <td class="stat-medium">35</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/jnakoivula" target="_blank">jnakoivula (Joonas Koivula)</a></td>
+                                <td class="stat-medium">28</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/ElinaHer" target="_blank">ElinaHer (Elina Hertteli)</a></td>
+                                <td class="stat-medium">21</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/Jossuli" target="_blank">Jossuli (Johanna Aikio)</a></td>
+                                <td class="stat-low">7</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-5" onclick="toggleRepo('repo-5')">
+                    <span><a href="https://github.com/tvt25spl-bank/group_6" target="_blank" style="color: white;">tvt25spl-bank/group_6</a>
+                    (5 contributoria, 56 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-5">
+                    <table id="table-repo-5">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-5', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-5', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/Joppelii" target="_blank">Joppelii</a></td>
+                                <td class="stat-medium">14</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/SanttuHe" target="_blank">SanttuHe (Santtu Heikkilä)</a></td>
+                                <td class="stat-medium">14</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/Juhoro" target="_blank">Juhoro</a></td>
+                                <td class="stat-medium">12</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/JuhoRomp" target="_blank">JuhoRomp (Juho Romppainen)</a></td>
+                                <td class="stat-low">9</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/Ilvesveeti" target="_blank">Ilvesveeti (Veeti Ilvesluoto)</a></td>
+                                <td class="stat-low">7</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-6" onclick="toggleRepo('repo-6')">
+                    <span><a href="https://github.com/tvt25spl-bank/group_8" target="_blank" style="color: white;">tvt25spl-bank/group_8</a>
+                    (4 contributoria, 125 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-6">
+                    <table id="table-repo-6">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-6', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-6', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/tuomok1010" target="_blank">tuomok1010 (Tuomo Kanniainen)</a></td>
+                                <td class="stat-high">87</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/jonnejee" target="_blank">jonnejee (Jonne Karjalainen)</a></td>
+                                <td class="stat-medium">18</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/jaakkojaa" target="_blank">jaakkojaa (Jaakko Hätälä)</a></td>
+                                <td class="stat-medium">17</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/TomiKarhula" target="_blank">TomiKarhula (Tomi Karhula)</a></td>
+                                <td class="stat-low">3</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-7" onclick="toggleRepo('repo-7')">
+                    <span><a href="https://github.com/tvt25spl-bank/group_9" target="_blank" style="color: white;">tvt25spl-bank/group_9</a>
+                    (4 contributoria, 65 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-7">
+                    <table id="table-repo-7">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-7', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-7', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/HenriKemppainen" target="_blank">HenriKemppainen (Henri Kemppainen)</a></td>
+                                <td class="stat-medium">36</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/neeakolppanen" target="_blank">neeakolppanen (Neea Kolppanen)</a></td>
+                                <td class="stat-medium">18</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/Jennasipola" target="_blank">Jennasipola (Jenna Sipola)</a></td>
+                                <td class="stat-low">7</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/jamsaa1" target="_blank">jamsaa1 (Jami Kylmänen)</a></td>
+                                <td class="stat-low">4</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-8" onclick="toggleRepo('repo-8')">
+                    <span><a href="https://github.com/tvt25spl-bank/group_10" target="_blank" style="color: white;">tvt25spl-bank/group_10</a>
+                    (4 contributoria, 48 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-8">
+                    <table id="table-repo-8">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-8', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-8', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/h7mmxd" target="_blank">h7mmxd (Hammad Atif)</a></td>
+                                <td class="stat-medium">21</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/tohenttinen" target="_blank">tohenttinen (Touko Henttinen)</a></td>
+                                <td class="stat-medium">15</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/jessemarttinen1-spec" target="_blank">jessemarttinen1-spec (Jesse Marttinen)</a></td>
+                                <td class="stat-low">9</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/miro465" target="_blank">miro465 (Miro Haapasalo)</a></td>
+                                <td class="stat-low">3</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-9" onclick="toggleRepo('repo-9')">
+                    <span><a href="https://github.com/tvt25spl-bank/group_11" target="_blank" style="color: white;">tvt25spl-bank/group_11</a>
+                    (3 contributoria, 44 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-9">
+                    <table id="table-repo-9">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-9', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-9', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/vimukthimadushan94" target="_blank">vimukthimadushan94 (Vimukthi Parakrama)</a></td>
+                                <td class="stat-medium">31</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/aleksihaikara" target="_blank">aleksihaikara (Aleksi Haikara)</a></td>
+                                <td class="stat-low">9</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/hanninenj2001" target="_blank">hanninenj2001 (Jussi Hanninen)</a></td>
+                                <td class="stat-low">4</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-10" onclick="toggleRepo('repo-10')">
+                    <span><a href="https://github.com/tvt25spl-bank/group_12" target="_blank" style="color: white;">tvt25spl-bank/group_12</a>
+                    (3 contributoria, 23 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-10">
+                    <table id="table-repo-10">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-10', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-10', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/Jesperijk" target="_blank">Jesperijk (Jesperi Kontio)</a></td>
+                                <td class="stat-medium">13</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/eikkapine" target="_blank">eikkapine (eino mänty)</a></td>
+                                <td class="stat-low">7</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/EuliX59" target="_blank">EuliX59 (Eeli Aalto)</a></td>
+                                <td class="stat-low">3</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-11" onclick="toggleRepo('repo-11')">
+                    <span><a href="https://github.com/tvt25spl-bank/group_13" target="_blank" style="color: white;">tvt25spl-bank/group_13</a>
+                    (4 contributoria, 69 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-11">
+                    <table id="table-repo-11">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-11', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-11', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/HiskiMoi" target="_blank">HiskiMoi (Hiski Moilanen)</a></td>
+                                <td class="stat-medium">22</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/DanielHyvarinen" target="_blank">DanielHyvarinen (Daniel Hyvärinen)</a></td>
+                                <td class="stat-medium">22</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/EKa1la" target="_blank">EKa1la (Eetu Kaila)</a></td>
+                                <td class="stat-medium">18</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/Jerskacs" target="_blank">Jerskacs (Jerome Kälkäjä)</a></td>
+                                <td class="stat-low">7</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-12" onclick="toggleRepo('repo-12')">
+                    <span><a href="https://github.com/tvt25spl-bank/group_14" target="_blank" style="color: white;">tvt25spl-bank/group_14</a>
+                    (4 contributoria, 50 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-12">
+                    <table id="table-repo-12">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-12', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-12', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/HuovilaR" target="_blank">HuovilaR (Roni Huovila)</a></td>
+                                <td class="stat-medium">30</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/Daytaraytata" target="_blank">Daytaraytata (Kristian Härö)</a></td>
+                                <td class="stat-medium">11</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/rkeranen" target="_blank">rkeranen (Reetta Keränen)</a></td>
+                                <td class="stat-low">6</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/jalluz" target="_blank">jalluz (Eeli Mäkinen)</a></td>
+                                <td class="stat-low">3</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-13" onclick="toggleRepo('repo-13')">
+                    <span><a href="https://github.com/tvt25spo-bank/group_1" target="_blank" style="color: white;">tvt25spo-bank/group_1</a>
+                    (4 contributoria, 107 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-13">
+                    <table id="table-repo-13">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-13', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-13', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/chrismikh" target="_blank">chrismikh (Christopher Mikhaltsevitch)</a></td>
+                                <td class="stat-medium">34</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/mopsipriv" target="_blank">mopsipriv (Andrei Tsiptsou)</a></td>
+                                <td class="stat-medium">32</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/TopiKuha-Topsu" target="_blank">TopiKuha-Topsu (Topi Kuha)</a></td>
+                                <td class="stat-medium">21</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/PaleHerra" target="_blank">PaleHerra (Paulus Määttä)</a></td>
+                                <td class="stat-medium">20</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-14" onclick="toggleRepo('repo-14')">
+                    <span><a href="https://github.com/tvt25spo-bank/group_2" target="_blank" style="color: white;">tvt25spo-bank/group_2</a>
+                    (4 contributoria, 30 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-14">
+                    <table id="table-repo-14">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-14', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-14', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/OlliPA2" target="_blank">OlliPA2 (Olli Partanen)</a></td>
+                                <td class="stat-medium">14</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/LucasSal921" target="_blank">LucasSal921 (Lucas Salonen)</a></td>
+                                <td class="stat-medium">11</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/tsavela25" target="_blank">tsavela25 (Tommi Savela)</a></td>
+                                <td class="stat-low">3</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/NNIKLASS" target="_blank">NNIKLASS (Niklas Lampinen)</a></td>
+                                <td class="stat-low">2</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-15" onclick="toggleRepo('repo-15')">
+                    <span><a href="https://github.com/tvt25spo-bank/group_3" target="_blank" style="color: white;">tvt25spo-bank/group_3</a>
+                    (3 contributoria, 38 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-15">
+                    <table id="table-repo-15">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-15', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-15', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/eetutyni" target="_blank">eetutyni (Eetu Tyni)</a></td>
+                                <td class="stat-medium">20</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/qSakru" target="_blank">qSakru (Sakaria Poutiainen)</a></td>
+                                <td class="stat-medium">14</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/Omega-176" target="_blank">Omega-176 (Oliver Rajala)</a></td>
+                                <td class="stat-low">4</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-16" onclick="toggleRepo('repo-16')">
+                    <span><a href="https://github.com/tvt25spo-bank/group_4" target="_blank" style="color: white;">tvt25spo-bank/group_4</a>
+                    (4 contributoria, 166 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-16">
+                    <table id="table-repo-16">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-16', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-16', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/Onsekyl" target="_blank">Onsekyl (Kimi Leinola)</a></td>
+                                <td class="stat-high">109</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/pelepist" target="_blank">pelepist (Petteri Lepisto)</a></td>
+                                <td class="stat-medium">41</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/Veikko115" target="_blank">Veikko115 (Veikko Teppola)</a></td>
+                                <td class="stat-medium">12</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/aaporitaranta" target="_blank">aaporitaranta</a></td>
+                                <td class="stat-low">4</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-17" onclick="toggleRepo('repo-17')">
+                    <span><a href="https://github.com/tvt25spo-bank/group_5" target="_blank" style="color: white;">tvt25spo-bank/group_5</a>
+                    (4 contributoria, 114 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-17">
+                    <table id="table-repo-17">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-17', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-17', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/SNi-ops" target="_blank">SNi-ops (Santtu Nissinen)</a></td>
+                                <td class="stat-medium">43</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/Kuistiapina" target="_blank">Kuistiapina (Joni Ylimartimo)</a></td>
+                                <td class="stat-medium">36</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/AttePaaso" target="_blank">AttePaaso (Atte Paaso)</a></td>
+                                <td class="stat-medium">33</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/samivsam" target="_blank">samivsam (Sami Vahtola)</a></td>
+                                <td class="stat-low">2</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-18" onclick="toggleRepo('repo-18')">
+                    <span><a href="https://github.com/tvt25spo-bank/group_6" target="_blank" style="color: white;">tvt25spo-bank/group_6</a>
+                    (3 contributoria, 23 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-18">
+                    <table id="table-repo-18">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-18', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-18', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/EhtSome1" target="_blank">EhtSome1 (Alpo Uusitalo)</a></td>
+                                <td class="stat-medium">19</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/Jqh03" target="_blank">Jqh03 (Janne Hietanen)</a></td>
+                                <td class="stat-low">3</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/lenpel05" target="_blank">lenpel05 (Lenni Pellinen)</a></td>
+                                <td class="stat-low">1</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-19" onclick="toggleRepo('repo-19')">
+                    <span><a href="https://github.com/tvt25spo-bank/group_7" target="_blank" style="color: white;">tvt25spo-bank/group_7</a>
+                    (4 contributoria, 56 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-19">
+                    <table id="table-repo-19">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-19', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-19', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/aleksivatj" target="_blank">aleksivatj (Aleksi Vatjus-Anttila)</a></td>
+                                <td class="stat-medium">29</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/eliastikanoja" target="_blank">eliastikanoja (Elias Tikanoja)</a></td>
+                                <td class="stat-medium">15</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/aaroromppainen" target="_blank">aaroromppainen (Aaro Romppainen)</a></td>
+                                <td class="stat-medium">10</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/jmzzynz" target="_blank">jmzzynz (jim nguyen)</a></td>
+                                <td class="stat-low">2</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-20" onclick="toggleRepo('repo-20')">
+                    <span><a href="https://github.com/tvt25spo-bank/group_8" target="_blank" style="color: white;">tvt25spo-bank/group_8</a>
+                    (4 contributoria, 55 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-20">
+                    <table id="table-repo-20">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-20', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-20', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/natejak" target="_blank">natejak (Kajetan Zelech-Alatarvas)</a></td>
+                                <td class="stat-medium">22</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/Lassesa" target="_blank">Lassesa (Lasse Sarja)</a></td>
+                                <td class="stat-medium">20</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/arttutolli" target="_blank">arttutolli (Arttu Tölli)</a></td>
+                                <td class="stat-low">8</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/nhiiluong" target="_blank">nhiiluong (Nhi Luong)</a></td>
+                                <td class="stat-low">5</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-21" onclick="toggleRepo('repo-21')">
+                    <span><a href="https://github.com/tvt25spo-bank/group_10" target="_blank" style="color: white;">tvt25spo-bank/group_10</a>
+                    (3 contributoria, 25 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-21">
+                    <table id="table-repo-21">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-21', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-21', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/HenriEkorre" target="_blank">HenriEkorre (Henri Ekorre)</a></td>
+                                <td class="stat-medium">15</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/Ishaja77" target="_blank">Ishaja77 (Iiro Leppälä)</a></td>
+                                <td class="stat-low">5</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/kanelietana" target="_blank">kanelietana (Ella Liukkonen)</a></td>
+                                <td class="stat-low">5</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-22" onclick="toggleRepo('repo-22')">
+                    <span><a href="https://github.com/tvt25spo-bank/group_11" target="_blank" style="color: white;">tvt25spo-bank/group_11</a>
+                    (3 contributoria, 143 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-22">
+                    <table id="table-repo-22">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-22', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-22', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/InspectorSpy" target="_blank">InspectorSpy (Luka Huuhtanen)</a></td>
+                                <td class="stat-high">98</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/Been914" target="_blank">Been914 (Elias Lämsä)</a></td>
+                                <td class="stat-medium">32</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/UkkoP01" target="_blank">UkkoP01 (Ukko Peltola)</a></td>
+                                <td class="stat-medium">13</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-23" onclick="toggleRepo('repo-23')">
+                    <span><a href="https://github.com/tvt25spo-bank/group_12" target="_blank" style="color: white;">tvt25spo-bank/group_12</a>
+                    (4 contributoria, 85 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-23">
+                    <table id="table-repo-23">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-23', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-23', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/NicknameAlwaystaken" target="_blank">NicknameAlwaystaken (Miiro Ukonaho)</a></td>
+                                <td class="stat-medium">37</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/ilari7" target="_blank">ilari7 (Ilari Ruotsalainen)</a></td>
+                                <td class="stat-medium">20</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/jamppa2" target="_blank">jamppa2 (Jani Männynsalo)</a></td>
+                                <td class="stat-medium">18</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/kirsikkka" target="_blank">kirsikkka</a></td>
+                                <td class="stat-medium">10</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-24" onclick="toggleRepo('repo-24')">
+                    <span><a href="https://github.com/tvt25spo-bank/group_13" target="_blank" style="color: white;">tvt25spo-bank/group_13</a>
+                    (3 contributoria, 14 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-24">
+                    <table id="table-repo-24">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-24', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-24', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/TheGreatEvo" target="_blank">TheGreatEvo (Joona Närhi)</a></td>
+                                <td class="stat-medium">10</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/nakk1mies" target="_blank">nakk1mies</a></td>
+                                <td class="stat-low">3</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/OtsoVaarala" target="_blank">OtsoVaarala (Otso Väärälä)</a></td>
+                                <td class="stat-low">1</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-25" onclick="toggleRepo('repo-25')">
+                    <span><a href="https://github.com/tvt25spo-bank/group_14" target="_blank" style="color: white;">tvt25spo-bank/group_14</a>
+                    (4 contributoria, 19 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-25">
+                    <table id="table-repo-25">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-25', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-25', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/SasuWalta" target="_blank">SasuWalta (Sasu Walta)</a></td>
+                                <td class="stat-low">7</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/Helios36" target="_blank">Helios36 (Konsta Miilukangas)</a></td>
+                                <td class="stat-low">5</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/kekemaisteri" target="_blank">kekemaisteri (Keijo Säkkinen)</a></td>
+                                <td class="stat-low">4</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/erttispc" target="_blank">erttispc (Eero Mäntyvaara)</a></td>
+                                <td class="stat-low">3</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-26" onclick="toggleRepo('repo-26')">
+                    <span><a href="https://github.com/tvt25spo-bank/group_16" target="_blank" style="color: white;">tvt25spo-bank/group_16</a>
+                    (3 contributoria, 40 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-26">
+                    <table id="table-repo-26">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-26', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-26', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/luvmiko" target="_blank">luvmiko (Miko Tietäväinen)</a></td>
+                                <td class="stat-medium">15</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/Tevite1" target="_blank">Tevite1 (Veeti Terho)</a></td>
+                                <td class="stat-medium">14</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/Vilunki15" target="_blank">Vilunki15</a></td>
+                                <td class="stat-medium">11</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-27" onclick="toggleRepo('repo-27')">
+                    <span><a href="https://github.com/tvt25spo-bank/group_17" target="_blank" style="color: white;">tvt25spo-bank/group_17</a>
+                    (4 contributoria, 41 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-27">
+                    <table id="table-repo-27">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-27', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-27', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/EnkryptattuDev" target="_blank">EnkryptattuDev (Ville Vartiainen)</a></td>
+                                <td class="stat-medium">20</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/Janiii62" target="_blank">Janiii62 (Jani Mursu)</a></td>
+                                <td class="stat-low">8</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/RoNiku1" target="_blank">RoNiku1 (Roni Nikupeteri)</a></td>
+                                <td class="stat-low">7</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/Tuipandeerus" target="_blank">Tuipandeerus (Thomas Mustonen)</a></td>
+                                <td class="stat-low">6</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-28" onclick="toggleRepo('repo-28')">
+                    <span><a href="https://github.com/tvt25spo-bank/group_18" target="_blank" style="color: white;">tvt25spo-bank/group_18</a>
+                    (3 contributoria, 42 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-28">
+                    <table id="table-repo-28">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-28', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-28', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/erianl" target="_blank">erianl (Erian Latif)</a></td>
+                                <td class="stat-medium">25</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/helppopeli" target="_blank">helppopeli</a></td>
+                                <td class="stat-medium">12</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/osku12345" target="_blank">osku12345 (Oskari Veijola)</a></td>
+                                <td class="stat-low">5</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="repo-group">
+                <div class="repo-header" id="header-repo-29" onclick="toggleRepo('repo-29')">
+                    <span><a href="https://github.com/tvt25spo-bank/group_19" target="_blank" style="color: white;">tvt25spo-bank/group_19</a>
+                    (3 contributoria, 11 committia)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="repo-content" id="content-repo-29">
+                    <table id="table-repo-29">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable('table-repo-29', 0)">Contributor</th>
+                                <th class="sortable" onclick="sortTable('table-repo-29', 1)">Commitit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/FixLevelHeadPlz" target="_blank">FixLevelHeadPlz (Aleksi Puolitaival)</a></td>
+                                <td class="stat-low">7</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/asjbvgdjhasf" target="_blank">asjbvgdjhasf (Anttu Laulajainen)</a></td>
+                                <td class="stat-low">3</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/AleksandrCGM" target="_blank">AleksandrCGM (Aleksandr Starchenkov)</a></td>
+                                <td class="stat-low">1</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Pekka Alaluukas generoi raportin: <span id="lastUpdate"></span></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('lastUpdate').textContent = new Date().toLocaleString('fi-FI');
+
+        function showView(viewName) {
+            // Hide all views
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.view-toggle button').forEach(b => b.classList.remove('active'));
+
+            // Show selected view
+            document.getElementById('view-' + viewName).classList.add('active');
+            document.getElementById('btn-' + viewName).classList.add('active');
+        }
+
+        function toggleRepo(repoId) {
+            const header = document.getElementById('header-' + repoId);
+            const content = document.getElementById('content-' + repoId);
+
+            header.classList.toggle('collapsed');
+            content.classList.toggle('collapsed');
+        }
+
+        // Table sorting functionality
+        function sortTable(tableId, columnIndex) {
+            const table = document.getElementById(tableId);
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            const header = table.querySelectorAll('th')[columnIndex];
+
+            // Determine sort direction
+            const isAsc = header.classList.contains('sorted-asc');
+
+            // Remove all sort classes
+            table.querySelectorAll('th').forEach(th => {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+            });
+
+            // Add appropriate class
+            if (isAsc) {
+                header.classList.add('sorted-desc');
+            } else {
+                header.classList.add('sorted-asc');
+            }
+
+            // Sort rows
+            rows.sort((a, b) => {
+                let aVal = a.cells[columnIndex].textContent.trim();
+                let bVal = b.cells[columnIndex].textContent.trim();
+
+                // Try to parse as number
+                const aNum = parseFloat(aVal.replace(/[^0-9.-]/g, ''));
+                const bNum = parseFloat(bVal.replace(/[^0-9.-]/g, ''));
+
+                if (!isNaN(aNum) && !isNaN(bNum)) {
+                    return isAsc ? bNum - aNum : aNum - bNum;
+                } else {
+                    return isAsc ? bVal.localeCompare(aVal) : aVal.localeCompare(bVal);
+                }
+            });
+
+            // Re-append rows
+            rows.forEach(row => tbody.appendChild(row));
+        }
+    </script>
+</body>
+</html>
